@@ -5,6 +5,15 @@ public class Ventana : MonoBehaviour
 {
     void OnTriggerStay(Collider other)
     {
+        // si venis con el frasco, sale la que esta adentro
+        var f = other.GetComponentInParent<Frasco>();
+        if (f != null && f.atrapada != null)
+        {
+            f.atrapada.Liberar();
+            f.atrapada = null;
+            return;
+        }
+
         var a = other.GetComponentInParent<Arana>();
         if (a == null) return;
 

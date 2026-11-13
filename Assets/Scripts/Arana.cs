@@ -19,7 +19,9 @@ public class Arana : MonoBehaviour
     XRGrabInteractable grab;
     float angulo;
     float timer;
+    float veneno;
     bool muerta;
+    bool atrapada;
 
     void Start()
     {
@@ -29,10 +31,22 @@ public class Arana : MonoBehaviour
         timer = tiempoRonda;
     }
 
+    public bool EstaAgarrada()
+    {
+        return grab.isSelected;
+    }
+
     void Update()
     {
-        if (muerta) return;
+        if (muerta || atrapada) return;
         if (grab.isSelected) return;
+
+        // si estas bailando se asustan y se van
+        if (Juego.instancia.bailando && estado != Estado.Retirarse)
+        {
+            estado = Estado.Retirarse;
+            timer = 1.5f;
+        }
 
         Vector3 pj = jugador.position;
         pj.y = 0f;
@@ -91,6 +105,23 @@ public class Arana : MonoBehaviour
         // si la apoyas despacio no cuenta, hay que pegarle
         if (c.relativeVelocity.magnitude < ch.fuerzaMinima) return;
         Morir();
+    }
+
+    public void Rociar(float cantidad)
+    {
+        veneno += cantidad;
+        if (veneno >= 1f)
+            Morir();
+    }
+
+    public void Atrapar(Transform frasco)
+    {
+        atrapada = true;
+        grab.enabled = false;
+        GetComponent<Collider>().enabled = false;
+        transform.SetParent(frasco);
+        transform.localPosition = new Vector3(0f, -0.05f, 0f);
+        transform.localRotation = Quaternion.identity;
     }
 
     public void Morir()
