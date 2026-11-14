@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 public class Arana : MonoBehaviour
@@ -21,7 +22,6 @@ public class Arana : MonoBehaviour
     float timer;
     float veneno;
     bool muerta;
-    bool atrapada;
 
     void Start()
     {
@@ -29,6 +29,16 @@ public class Arana : MonoBehaviour
         grab = GetComponent<XRGrabInteractable>();
         angulo = Random.Range(0f, 360f);
         timer = tiempoRonda;
+        grab.selectExited.AddListener(Soltada);
+    }
+
+    // si la soltas cerca de la ventana, chau
+    void Soltada(SelectExitEventArgs e)
+    {
+        float d = Ventana.instancia.Distancia(transform.position);
+        //Debug.Log("solte la araña a " + d.ToString("0.00") + " m de la ventana");
+        if (d < Ventana.instancia.radio)
+            Liberar();
     }
 
     public bool EstaAgarrada()
@@ -38,7 +48,7 @@ public class Arana : MonoBehaviour
 
     void Update()
     {
-        if (muerta || atrapada) return;
+        if (muerta) return;
         if (grab.isSelected) return;
 
         // si estas bailando se asustan y se van
@@ -110,18 +120,11 @@ public class Arana : MonoBehaviour
     public void Rociar(float cantidad)
     {
         veneno += cantidad;
+        // se va poniendo verde para que se note que le estas pegando
+        foreach (var r in GetComponentsInChildren<MeshRenderer>())
+            r.material.color = Color.Lerp(r.material.color, Color.green, cantidad * 2f);
         if (veneno >= 1f)
             Morir();
-    }
-
-    public void Atrapar(Transform frasco)
-    {
-        atrapada = true;
-        grab.enabled = false;
-        GetComponent<Collider>().enabled = false;
-        transform.SetParent(frasco);
-        transform.localPosition = new Vector3(0f, -0.05f, 0f);
-        transform.localRotation = Quaternion.identity;
     }
 
     public void Morir()

@@ -10,14 +10,10 @@ public class Tienda : MonoBehaviour
     public Text textoPuntos;
     public Text textoBotonEmpezar;
     public Text textoFinal;
-    public GameObject prefabFrasco;
     public GameObject prefabSpray;
-    public Transform lugarFrasco;
     public Transform lugarSpray;
-    public int precioFrasco = 20;
     public int precioSpray = 30;
 
-    bool frascoComprado;
     bool sprayComprado;
 
     void Update()
@@ -55,15 +51,6 @@ public class Tienda : MonoBehaviour
     public void DeNuevo()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
-    public void ComprarFrasco()
-    {
-        if (frascoComprado) return;
-        if (Juego.instancia.puntos < precioFrasco) return;
-        Juego.instancia.Gastar(precioFrasco);
-        frascoComprado = true;
-        Instantiate(prefabFrasco, lugarFrasco.position, Quaternion.identity);
     }
 
     public void ComprarSpray()

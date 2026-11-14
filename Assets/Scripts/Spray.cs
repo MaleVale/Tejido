@@ -5,11 +5,13 @@ public class Spray : MonoBehaviour
 {
     public Transform pico;
     public LineRenderer chorro;
-    public float alcance = 2f;
-    public float tiempoParaMatar = 1.5f;
+    public float alcance = 3f;
+    public float grosor = 0.15f;
+    public float tiempoParaMatar = 1f;
 
     XRGrabInteractable grab;
     bool apretado;
+    float avisar;
 
     void Start()
     {
@@ -27,12 +29,20 @@ public class Spray : MonoBehaviour
 
         Vector3 fin = pico.position + pico.forward * alcance;
         RaycastHit hit;
-        if (Physics.Raycast(pico.position, pico.forward, out hit, alcance))
+        // spherecast para no tener que apuntar justo, las arañas son chicas
+        if (Physics.SphereCast(pico.position, grosor, pico.forward, out hit, alcance, ~0, QueryTriggerInteraction.Ignore))
         {
-            fin = hit.point;
+            fin = pico.position + pico.forward * hit.distance;
             var a = hit.collider.GetComponentInParent<Arana>();
             if (a != null)
                 a.Rociar(Time.deltaTime / tiempoParaMatar);
+
+            avisar -= Time.deltaTime;
+            if (avisar <= 0f)
+            {
+                avisar = 0.5f;
+                //Debug.Log("el spray toca " + hit.collider.name + " a " + hit.distance.ToString("0.00") + " m");
+            }
         }
 
         chorro.SetPosition(0, pico.position);
