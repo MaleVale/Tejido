@@ -14,7 +14,7 @@ public class Tienda : MonoBehaviour
     public Transform lugarSpray;
     public int precioSpray = 30;
 
-    bool sprayComprado;
+    int latas;
 
     void Update()
     {
@@ -53,12 +53,14 @@ public class Tienda : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
+    // las latas se gastan, asi que se puede comprar mas de una
     public void ComprarSpray()
     {
-        if (sprayComprado) return;
         if (Juego.instancia.puntos < precioSpray) return;
         Juego.instancia.Gastar(precioSpray);
-        sprayComprado = true;
-        Instantiate(prefabSpray, lugarSpray.position, Quaternion.identity);
+        // cada lata un poquito corrida para que no se apilen
+        Vector3 lugar = lugarSpray.position + new Vector3(0.15f * latas, 0f, 0f);
+        Instantiate(prefabSpray, lugar, Quaternion.identity);
+        latas++;
     }
 }
