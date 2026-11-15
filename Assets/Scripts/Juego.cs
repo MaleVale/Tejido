@@ -1,11 +1,17 @@
+using System.Collections;
 using UnityEngine;
 
 public class Juego : MonoBehaviour
 {
     public static Juego instancia;
 
-    public GameObject prefabArana;
+    public GameObject[] prefabsArana; // una por nivel, cada vez mas fea
+    public float[] escalaArana = { 1f, 1.4f, 2f };
     public Transform[] escondites;
+    public Transform[] esconditesPasillo; // de noche salen por la puerta
+    public Transform puerta;
+    public float anguloPuerta = 90f;
+    public Collider piso;
     public TextMesh cartel;
     public Tienda tienda;
     public Light sol;
@@ -15,6 +21,7 @@ public class Juego : MonoBehaviour
     public int nivel = 1;
     public int puntos = 0;
     public bool bailando;
+    [HideInInspector] public Bounds cuarto;
 
     // mañana, tarde y noche
     public int[] totalPorNivel = { 6, 8, 10 };
@@ -36,6 +43,9 @@ public class Juego : MonoBehaviour
     void Awake()
     {
         instancia = this;
+        // hasta aca llegan las arañas, un poco menos que el piso para que no se metan en la pared
+        cuarto = piso.bounds;
+        cuarto.Expand(new Vector3(-0.3f, 20f, -0.3f));
     }
 
     void Start()
@@ -68,16 +78,39 @@ public class Juego : MonoBehaviour
         aparecidas = 0;
         vivas = 0;
         timer = 0f;
+        if (nivel == 3 && puerta != null)
+        {
+            StartCoroutine(AbrirPuerta());
+            timer = 2.5f; // que termine de abrirse antes de que salgan
+        }
         enNivel = true;
         tienda.Cerrar();
         Mostrar();
     }
 
+    IEnumerator AbrirPuerta()
+    {
+        Quaternion cerrada = puerta.rotation;
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime / 2f;
+            puerta.rotation = Quaternion.AngleAxis(Mathf.SmoothStep(0f, anguloPuerta, t), Vector3.up) * cerrada;
+            yield return null;
+        }
+    }
+
     void Aparecer()
     {
-        var e = escondites[Random.Range(0, escondites.Length)];
-        var go = Instantiate(prefabArana, e.position, Quaternion.identity);
+        int i = nivel - 1;
+        var lista = escondites;
+        if (nivel == 3 && esconditesPasillo.Length > 0)
+            lista = esconditesPasillo;
+        var e = lista[Random.Range(0, lista.Length)];
+        var go = Instantiate(prefabsArana[i], e.position, Quaternion.identity);
+        go.transform.localScale *= escalaArana[i];
         var a = go.GetComponent<Arana>();
+        a.altura *= escalaArana[i];
         // cada nivel se animan mas
         a.velocidad = 0.5f + 0.25f * nivel;
         a.radioRonda = Mathf.Max(0.8f, 2.5f - 0.5f * nivel);
