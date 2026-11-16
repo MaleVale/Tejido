@@ -12,7 +12,7 @@ public class Juego : MonoBehaviour
     public Transform puerta;
     public float anguloPuerta = 90f;
     public Collider piso;
-    public TextMesh cartel;
+    public Hud hud;
     public Tienda tienda;
     public Light sol;
     public Light velador;
@@ -50,7 +50,10 @@ public class Juego : MonoBehaviour
 
     void Start()
     {
-        EmpezarNivel();
+        // la luz de la mañana ya, las arañas recien cuando pasas las pantallas de inicio
+        Luces();
+        tienda.Cerrar();
+        Mostrar();
     }
 
     void Update()
@@ -65,7 +68,14 @@ public class Juego : MonoBehaviour
         Aparecer();
     }
 
-    void EmpezarNivel()
+    public void Empezar()
+    {
+        if (hud != null)
+            hud.gameObject.SetActive(true);
+        EmpezarNivel();
+    }
+
+    void Luces()
     {
         int i = nivel - 1;
         sol.intensity = luzSol[i];
@@ -74,18 +84,25 @@ public class Juego : MonoBehaviour
         velador.enabled = nivel == 3;
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
         RenderSettings.ambientLight = colorSol[i] * (nivel == 3 ? 0.15f : 0.5f);
+    }
 
+    void EmpezarNivel()
+    {
+        Luces();
         aparecidas = 0;
         vivas = 0;
         timer = 0f;
+        string aviso = "Empieza la " + momentos[nivel - 1];
         if (nivel == 3 && puerta != null)
         {
             StartCoroutine(AbrirPuerta());
             timer = 2.5f; // que termine de abrirse antes de que salgan
+            aviso = "Es de noche... se abre la puerta";
         }
         enNivel = true;
         tienda.Cerrar();
         Mostrar();
+        Avisar(aviso);
     }
 
     IEnumerator AbrirPuerta()
@@ -126,12 +143,14 @@ public class Juego : MonoBehaviour
         {
             aplastadas++;
             puntos += 10;
+            Avisar("+10 aplastada");
         }
         else
         {
             // liberar vale mas
             salvadas++;
             puntos += 20;
+            Avisar("+20 liberada");
         }
 
         vivas--;
@@ -158,19 +177,27 @@ public class Juego : MonoBehaviour
     public void Picadura()
     {
         puntos -= 5;
+        Avisar("-5 te picó");
         Mostrar();
     }
 
     public void Gastar(int cuanto)
     {
         puntos -= cuanto;
+        Avisar("-" + cuanto + " spray");
         Mostrar();
+    }
+
+    void Avisar(string texto)
+    {
+        if (hud != null)
+            hud.Avisar(texto);
     }
 
     void Mostrar()
     {
-        if (cartel == null) return;
         int faltan = totalPorNivel[nivel - 1] - aparecidas + vivas;
-        cartel.text = momentos[nivel - 1] + "\nPuntos " + puntos + "\nFaltan " + faltan;
+        if (hud != null)
+            hud.Mostrar(momentos[nivel - 1], puntos, faltan);
     }
 }
