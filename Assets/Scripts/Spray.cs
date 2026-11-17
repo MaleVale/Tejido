@@ -14,7 +14,6 @@ public class Spray : MonoBehaviour
     XRGrabInteractable grab;
     bool apretado;
     float carga;
-    float avisar;
     float altoBarra;
     Renderer rendBarra;
 
@@ -49,13 +48,6 @@ public class Spray : MonoBehaviour
             var a = hit.collider.GetComponentInParent<Araña>();
             if (a != null)
                 a.Rociar(Time.deltaTime / tiempoParaMatar);
-
-            avisar -= Time.deltaTime;
-            if (avisar <= 0f)
-            {
-                avisar = 0.5f;
-                //Debug.Log("el spray toca " + hit.collider.name + " a " + hit.distance.ToString("0.00") + " m");
-            }
         }
 
         chorro.SetPosition(0, pico.position);

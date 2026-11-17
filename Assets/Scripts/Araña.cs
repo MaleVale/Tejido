@@ -13,6 +13,7 @@ public class Araña : MonoBehaviour
     public float tiempoRonda = 6f;
     public float distPicar = 0.45f;
     public float altura = 0.08f;
+    public AudioSource pasos;
 
     Transform jugador;
     XRGrabInteractable grab;
@@ -33,6 +34,7 @@ public class Araña : MonoBehaviour
         anim = GetComponentInChildren<Animator>();
         angulo = Random.Range(0f, 360f);
         timer = tiempoRonda;
+        pasos.pitch = Random.Range(0.9f, 1.1f);
         grab.selectEntered.AddListener(Agarrada);
         grab.selectExited.AddListener(Soltada);
     }
@@ -58,6 +60,7 @@ public class Araña : MonoBehaviour
     IEnumerator Volar()
     {
         volando = true;
+        pasos.Stop();
         Vector3 desde = transform.position;
         Vector3 hasta = Ventana.instancia.transform.position;
         for (float t = 0f; t < 1f; t += Time.deltaTime * 3f)
@@ -68,17 +71,13 @@ public class Araña : MonoBehaviour
         Liberar();
     }
 
-    public bool EstaAgarrada()
-    {
-        return grab.isSelected;
-    }
-
     void Update()
     {
         if (muerta || volando) return;
         if (grab.isSelected)
         {
             if (anim != null) anim.speed = 0f;
+            pasos.Pause();
             // me guardo a que velocidad la lleva la mano por si la tira
             velMano = Vector3.Lerp(velMano, (transform.position - posAnterior) / Time.deltaTime, 0.3f);
             posAnterior = transform.position;
@@ -143,10 +142,15 @@ public class Araña : MonoBehaviour
         }
 
         Vector3 dir = nueva - pos;
-        if (dir.sqrMagnitude > 0.00001f)
+        bool camina = dir.sqrMagnitude > 0.00001f;
+        if (camina)
             transform.rotation = Quaternion.LookRotation(dir);
         if (anim != null)
-            anim.speed = dir.sqrMagnitude > 0.00001f ? 1f : 0f;
+            anim.speed = camina ? 1f : 0f;
+        if (!camina)
+            pasos.Pause();
+        else if (!pasos.isPlaying)
+            pasos.Play();
 
         nueva.y = altura;
         transform.position = nueva;

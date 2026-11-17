@@ -20,6 +20,11 @@ public class Juego : MonoBehaviour
     public Light velador;
     public Renderer cielo; // lo que se ve por la ventana
     public Material[] cielos; // mañana, tarde y noche
+    public AudioSource ambiente;
+    public AudioClip[] sonidosDia;
+    public AudioClip sonidoPuerta;
+    public AudioClip sonidoVictoria;
+    public Inicio inicio;
 
     public int nivel = 1;
     public int puntos = 0;
@@ -39,6 +44,8 @@ public class Juego : MonoBehaviour
     int aparecidas;
     int salvadas;
     int aplastadas;
+    int[] puntosNivel = new int[3];
+    int puntosAlEmpezar;
     bool enNivel;
     float timer;
 
@@ -86,6 +93,11 @@ public class Juego : MonoBehaviour
         velador.enabled = nivel == 3;
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
         RenderSettings.ambientLight = colorSol[i] * (nivel == 3 ? 0.15f : 0.5f);
+        if (ambiente.clip != sonidosDia[i])
+        {
+            ambiente.clip = sonidosDia[i];
+            ambiente.Play();
+        }
     }
 
     void EmpezarNivel()
@@ -109,6 +121,7 @@ public class Juego : MonoBehaviour
 
     IEnumerator AbrirPuerta()
     {
+        AudioSource.PlayClipAtPoint(sonidoPuerta, puerta.position);
         Quaternion cerrada = puerta.rotation;
         float t = 0f;
         while (t < 1f)
@@ -169,10 +182,24 @@ public class Juego : MonoBehaviour
     void TerminarNivel()
     {
         enNivel = false;
+        puntosNivel[nivel - 1] = puntos - puntosAlEmpezar;
+        puntosAlEmpezar = puntos;
         if (nivel >= 3)
-            tienda.MostrarFinal(salvadas, aplastadas);
+            Ganar();
         else
             tienda.Abrir("Terminó la " + momentos[nivel - 1], "Empezar la " + momentos[nivel]);
+    }
+
+    void Ganar()
+    {
+        int[] maximos = new int[3];
+        for (int i = 0; i < 3; i++)
+            maximos[i] = totalPorNivel[i] * 20;
+        ambiente.Stop();
+        ambiente.PlayOneShot(sonidoVictoria);
+        if (hud != null)
+            hud.gameObject.SetActive(false);
+        inicio.MostrarVictoria(puntosNivel, maximos, salvadas, aplastadas);
     }
 
     public void SiguienteNivel()
