@@ -31,7 +31,7 @@ public class Chancla : MonoBehaviour
         Vector3 abajo = transform.position + Vector3.down * alcance;
         foreach (var c in Physics.OverlapCapsule(transform.position, abajo, radio))
         {
-            var a = c.GetComponentInParent<Arana>();
+            var a = c.GetComponentInParent<Araña>();
             if (a == null) continue;
             a.Morir();
             espera = 0.3f;

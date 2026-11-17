@@ -5,8 +5,10 @@ public class Juego : MonoBehaviour
 {
     public static Juego instancia;
 
-    public GameObject[] prefabsArana; // una por nivel, cada vez mas fea
-    public float[] escalaArana = { 1f, 1.4f, 2f };
+    public GameObject arañaNivel1;
+    public GameObject[] arañasNivel2; // sale cualquiera de estas
+    public GameObject arañaBoss;
+    public float[] escalaAraña = { 1f, 1.4f, 4f }; // la jefa es enorme
     public Transform[] escondites;
     public Transform[] esconditesPasillo; // de noche salen por la puerta
     public Transform puerta;
@@ -16,7 +18,8 @@ public class Juego : MonoBehaviour
     public Tienda tienda;
     public Light sol;
     public Light velador;
-    public Renderer ventana;
+    public Renderer cielo; // lo que se ve por la ventana
+    public Material[] cielos; // mañana, tarde y noche
 
     public int nivel = 1;
     public int puntos = 0;
@@ -28,7 +31,6 @@ public class Juego : MonoBehaviour
     public int[] vivasMax = { 3, 4, 5 };
     public float[] luzSol = { 1.2f, 0.5f, 0.03f };
     public Color[] colorSol = { new Color(1f, 0.96f, 0.85f), new Color(1f, 0.7f, 0.4f), new Color(0.3f, 0.35f, 0.6f) };
-    public Color[] colorVentana = { new Color(0.6f, 0.85f, 1f), new Color(1f, 0.6f, 0.3f), new Color(0.05f, 0.05f, 0.15f) };
     public float cadaCuanto = 2f;
 
     string[] momentos = { "mañana", "tarde", "noche" };
@@ -80,7 +82,7 @@ public class Juego : MonoBehaviour
         int i = nivel - 1;
         sol.intensity = luzSol[i];
         sol.color = colorSol[i];
-        ventana.material.color = colorVentana[i];
+        cielo.sharedMaterial = cielos[i];
         velador.enabled = nivel == 3;
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
         RenderSettings.ambientLight = colorSol[i] * (nivel == 3 ? 0.15f : 0.5f);
@@ -124,10 +126,15 @@ public class Juego : MonoBehaviour
         if (nivel == 3 && esconditesPasillo.Length > 0)
             lista = esconditesPasillo;
         var e = lista[Random.Range(0, lista.Length)];
-        var go = Instantiate(prefabsArana[i], e.position, Quaternion.identity);
-        go.transform.localScale *= escalaArana[i];
-        var a = go.GetComponent<Arana>();
-        a.altura *= escalaArana[i];
+        GameObject prefab = arañaNivel1;
+        if (nivel == 2)
+            prefab = arañasNivel2[Random.Range(0, arañasNivel2.Length)];
+        else if (nivel == 3)
+            prefab = arañaBoss;
+        var go = Instantiate(prefab, e.position, Quaternion.identity);
+        go.transform.localScale *= escalaAraña[i];
+        var a = go.GetComponent<Araña>();
+        a.altura *= escalaAraña[i];
         // cada nivel se animan mas
         a.velocidad = 0.5f + 0.25f * nivel;
         a.radioRonda = Mathf.Max(0.8f, 2.5f - 0.5f * nivel);
@@ -137,7 +144,7 @@ public class Juego : MonoBehaviour
         Mostrar();
     }
 
-    public void AranaResuelta(bool aplastada)
+    public void ArañaResuelta(bool aplastada)
     {
         if (aplastada)
         {

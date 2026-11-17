@@ -46,7 +46,7 @@ public class Spray : MonoBehaviour
         if (Physics.SphereCast(pico.position, grosor, pico.forward, out hit, alcance, ~0, QueryTriggerInteraction.Ignore))
         {
             fin = pico.position + pico.forward * hit.distance;
-            var a = hit.collider.GetComponentInParent<Arana>();
+            var a = hit.collider.GetComponentInParent<Araña>();
             if (a != null)
                 a.Rociar(Time.deltaTime / tiempoParaMatar);
 

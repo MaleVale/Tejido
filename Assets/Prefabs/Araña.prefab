@@ -1184,7 +1184,7 @@ GameObject:
   - component: {fileID: 8190273320598738662}
   - component: {fileID: 3887254066161510229}
   m_Layer: 0
-  m_Name: Arana
+  m_Name: Araña
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1408,7 +1408,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdbe53e0741c5544fa55286b80427c76, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Arana
+  m_EditorClassIdentifier: Assembly-CSharp::Araña
   estado: 0
   velocidad: 0.6
   radioRonda: 2
